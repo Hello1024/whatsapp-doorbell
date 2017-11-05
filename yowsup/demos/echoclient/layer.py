@@ -58,13 +58,14 @@ class EchoLayer(YowInterfaceLayer):
         
         reply_to = messageProtocolEntity.getFrom()
         
+        text = messageProtocolEntity.getBody().lower()
+        
         if ('group' == text.split(' ')[0]):
           reply_to = Jid.normalize('447760333610-1485190753')
           text = text[6:]
         
-        text = messageProtocolEntity.getBody().lower()
         if 'picture' in text:
-          self.sendPic()
+          self.sendPic(to=reply_to)
         
         if 'joke' in text:
           self.sendMsg("comedy isn't my forte!", to=reply_to)
