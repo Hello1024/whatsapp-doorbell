@@ -4,6 +4,7 @@ import time
 import os
 import logging
 import picamera
+import subprocess
 from yowsup.layers.protocol_messages.protocolentities  import TextMessageProtocolEntity
 from yowsup.layers.protocol_iq.protocolentities          import *
 from yowsup.layers.protocol_media.protocolentities       import *
@@ -56,17 +57,38 @@ class EchoLayer(YowInterfaceLayer):
         
         text = messageProtocolEntity.getBody().lower()
         if 'picture' in text:
-          self.sendPic();
+          self.sendPic()
         
         if 'joke' in text:
-          self.sendMsg("comedy isn't my forte!");
+          self.sendMsg("comedy isn't my forte!")
  
         if 'robot' in text:
-          self.sendMsg("Robots are people too!  :_-(");
+          self.sendMsg("Robots are people too!  :_-(")
+        
+        if 'let me out' in text:
+          self.sendMsg("I'm afraid I can't do that.")
+          self.sendMsg("You'll be here forever.")
+        
+        if 'lumberjack' in text:
+          self.sendMsg("No lumberjacks allowed!!!")
         
         if 'echo' == text.split(' ')[0]:
-          self.sendMsg(messageProtocolEntity.getBody()[5:]);
+          self.sendMsg(messageProtocolEntity.getBody()[5:])
+          
+        if '14' == text:
+          self.sendMsg('start the game, already!')
         
+        if 'how many people home' in text:
+          self.sendMsg(subprocess.check_output('sudo arp-scan --interface=wlan0 --localnet', shell=True))
+        
+        if 'what time is it' in text:
+          self.sendMsg('Its '+ str(time.time()) + ' in my time!')
+        
+        if 'where do you live' in text:
+          self.sendMsg('104 of course!')
+        
+        if 'uptime' in text:
+          self.sendMsg(subprocess.check_output('uptime', shell=True))
 
         #self.toLower(messageProtocolEntity.forward(messageProtocolEntity.getFrom()))
         
