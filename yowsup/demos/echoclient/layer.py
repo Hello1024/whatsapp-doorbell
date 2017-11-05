@@ -51,44 +51,51 @@ class EchoLayer(YowInterfaceLayer):
         
     @ProtocolEntityCallback("message")
     def onMessage(self, messageProtocolEntity):
+        
 
         self.toLower(messageProtocolEntity.ack())
         self.toLower(messageProtocolEntity.ack(True))
+        
+        reply_to = messageProtocolEntity.getFrom()
+        
+        if ('group' == text.split(' ')[0]):
+          reply_to = Jid.normalize('447760333610-1485190753')
+          text = text[6:]
         
         text = messageProtocolEntity.getBody().lower()
         if 'picture' in text:
           self.sendPic()
         
         if 'joke' in text:
-          self.sendMsg("comedy isn't my forte!")
+          self.sendMsg("comedy isn't my forte!", to=reply_to)
  
         if 'robot' in text:
-          self.sendMsg("Robots are people too!  :_-(")
+          self.sendMsg("Robots are people too!  :_-(", to=reply_to)
         
         if 'let me out' in text:
-          self.sendMsg("I'm afraid I can't do that.")
-          self.sendMsg("You'll be here forever.")
+          self.sendMsg("I'm afraid I can't do that.", to=reply_to)
+          self.sendMsg("You'll be here forever.", to=reply_to)
         
         if 'lumberjack' in text:
-          self.sendMsg("No lumberjacks allowed!!!")
+          self.sendMsg("No lumberjacks allowed!!!", to=reply_to)
         
         if 'echo' == text.split(' ')[0]:
-          self.sendMsg(messageProtocolEntity.getBody()[5:])
+          self.sendMsg(messageProtocolEntity.getBody()[5:], to=reply_to)
           
         if '14' == text:
-          self.sendMsg('start the game, already!')
+          self.sendMsg('start the game, already!', to=reply_to)
         
         if 'how many people home' in text:
-          self.sendMsg(subprocess.check_output('sudo arp-scan --interface=wlan0 --localnet', shell=True))
+          self.sendMsg(subprocess.check_output('sudo arp-scan --interface=wlan0 --localnet', shell=True), to=reply_to)
         
         if 'what time is it' in text:
-          self.sendMsg('Its '+ str(time.time()) + ' in my time!')
+          self.sendMsg('Its '+ str(time.time()) + ' in my time!', to=reply_to)
         
         if 'where do you live' in text:
-          self.sendMsg('104 of course!')
+          self.sendMsg('104 of course!', to=reply_to)
         
         if 'uptime' in text:
-          self.sendMsg(subprocess.check_output('uptime', shell=True))
+          self.sendMsg(subprocess.check_output('uptime', shell=True), to=reply_to)
 
         #self.toLower(messageProtocolEntity.forward(messageProtocolEntity.getFrom()))
         
@@ -97,20 +104,19 @@ class EchoLayer(YowInterfaceLayer):
     def onReceipt(self, entity):
         self.toLower(entity.ack())
 
-    def sendMsg(self, text):
-        logging.info('Sent %s', text)
-        messageEntity = TextMessageProtocolEntity(text, to = Jid.normalize('447760333610-1485190753'))
+    def sendMsg(self, text, to = Jid.normalize('447760333610-1485190753')):
+        logging.info('Sent %s to %s', text, to)
+        messageEntity = TextMessageProtocolEntity(text, to = to)
         self.toLower(messageEntity)
         
-    def sendPic(self):
+    def sendPic(self, to = Jid.normalize('447760333610-1485190753')):
           #os.system('raspistill -o img.jpg')
           self.camera.capture('img.jpg')
           path='img.jpg'
-          jid=Jid.normalize('447760333610-1485190753')
           mediaType = RequestUploadIqProtocolEntity.MEDIA_TYPE_IMAGE
           entity = RequestUploadIqProtocolEntity(mediaType, filePath=path)
-          successFn = lambda successEntity, originalEntity: self.onRequestUploadResult(jid, mediaType, path, successEntity, originalEntity, None)
-          errorFn = lambda errorEntity, originalEntity: self.onRequestUploadError(jid, path, errorEntity, originalEntity)
+          successFn = lambda successEntity, originalEntity: self.onRequestUploadResult(to, mediaType, path, successEntity, originalEntity, None)
+          errorFn = lambda errorEntity, originalEntity: self.onRequestUploadError(to, path, errorEntity, originalEntity)
           self._sendIq(entity, successFn, errorFn)
  
     def onRequestUploadResult(self):
